@@ -13,7 +13,7 @@ export interface CreateHandlerOptions {
 
 function defaultExpressAppFromMiddleware(
   middleware: express.RequestHandler,
-): express.Handler {
+): express.Express {
   const app = express();
   app.use(middleware);
   return app;
@@ -24,8 +24,8 @@ export class ApolloServer extends ApolloServerExpress {
     return true;
   }
 
-  public createHandler(options?: CreateHandlerOptions): express.Handler {
-    let realHandler: express.Handler;
+  public createHandler(options?: CreateHandlerOptions): express.Express {
+    let realHandler: express.Express ;
     return async (req, ...args) => {
       await this.ensureStarted();
       if (!realHandler) {
