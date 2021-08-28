@@ -13,7 +13,7 @@ export interface CreateHandlerOptions {
 
 function defaultExpressAppFromMiddleware(
   middleware: express.RequestHandler,
-): express.Handler {
+): express.Express {
   const app = express();
   app.use(middleware);
   return app;
@@ -24,25 +24,19 @@ export class ApolloServer extends ApolloServerExpress {
     return true;
   }
 
-  public createHandler(options?: CreateHandlerOptions): express.Handler {
-    let realHandler: express.Handler;
-    return async (req, ...args) => {
-      await this.ensureStarted();
-      if (!realHandler) {
-        const middleware = this.getMiddleware(
-          // By default, serverless integrations serve on root rather than
-          // /graphql, since serverless handlers tend to just do one thing and
-          // paths are generally configured as part of deploying the app.
-          {
-            path: '/',
-            ...options?.expressGetMiddlewareOptions,
-          },
-        );
-        realHandler = (
-          options?.expressAppFromMiddleware ?? defaultExpressAppFromMiddleware
-        )(middleware);
-      }
-      return realHandler(req, ...args);
-    };
+  public async createHandler(options?: CreateHandlerOptions) {
+    await this.ensureStarted();
+    const middleware = this.getMiddleware(
+      // By default, serverless integrations serve on root rather than
+      // /graphql, since serverless handlers tend to just do one thing and
+      // paths are generally configured as part of deploying the app.
+      {
+        path: '/',
+        ...options?.expressGetMiddlewareOptions,
+      },
+    );
+    const realHandler = (options?.expressAppFromMiddleware ?? defaultExpressAppFromMiddleware)(middleware);
+
+    return realHandler;
   }
 }

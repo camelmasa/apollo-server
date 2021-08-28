@@ -30,7 +30,7 @@ const createCloudFunction = async (
   options: CreateAppOptions = {},
   createHandlerOptions: CreateHandlerOptions = {},
 ) => {
-  const handler = new ApolloServer(
+  const handler = await new ApolloServer(
     (options.graphqlOptions as Config) || { schema: Schema },
   ).createHandler(createHandlerOptions);
 
